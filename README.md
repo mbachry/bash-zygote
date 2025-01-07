@@ -12,6 +12,17 @@ bash completions, profile files, etc.), listens on a varlink socket
 and spawns new pre-initialized shells that "steal" newly created
 terminals.
 
+Before:
+
+![before](https://raw.githubusercontent.com/mbachry/bash-zygote/refs/heads/media/media/before.gif)
+
+After:
+
+![after](https://raw.githubusercontent.com/mbachry/bash-zygote/refs/heads/media/media/after.gif)
+
+The change might seem small, but makes a huge difference if you open
+tabs a lot, especially during heavy compilations.
+
 ## Installation
 
 Make sure all `bash` build requirements are installed. Also install
