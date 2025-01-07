@@ -14,11 +14,11 @@ terminals.
 
 Before:
 
-![before](https://raw.githubusercontent.com/mbachry/bash-zygote/refs/heads/media/media/before.gif)
+![before](https://raw.githubusercontent.com/mbachry/bash-zygote/refs/heads/main/media/before.gif)
 
 After:
 
-![after](https://raw.githubusercontent.com/mbachry/bash-zygote/refs/heads/media/media/after.gif)
+![after](https://raw.githubusercontent.com/mbachry/bash-zygote/refs/heads/main/media/after.gif)
 
 The change might seem small, but makes a huge difference if you open
 tabs a lot, especially during heavy compilations.
