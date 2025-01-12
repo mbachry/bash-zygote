@@ -196,10 +196,14 @@ index ebd89651..c3ea87b4 100644
 +    const char *interface = "interface org.bash.zygote\n"
 +                            "method Spawn(pid: int, tty_name: string, current_dir: string) -> (pid: int)";
 +
++    int fd = -1;
++    if (getenv("LISTEN_FDS") != NULL)
++        fd = 3;
++
 +    int res = varlink_service_new(&ctx.service,
 +                                  "mbachry", "bash-zygote", "0.1", "https://github.com/mbachry/bash-zygote",
 +                                  socket_addr,
-+                                  -1);
++                                  fd);
 +    if (res < 0) {
 +        fprintf(stderr, "varlink_service_new: %s (%m)\n", varlink_error_string(res));
 +        exit_shell(1);

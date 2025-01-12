@@ -33,7 +33,17 @@ Run `make` and copy `build/bash-zygote` and `build/bash-zygote-client`
 to bin location of your choice, eg. `~/.local/bin` or
 `/usr/local/bin`.
 
-Create the following systemd unit in `~/.config/systemd/user/bash-zygote.service`:
+Create the following systemd unit in `~/.config/systemd/user/bash-zygote.socket`
+
+```
+[Socket]
+ListenStream=@bash-zygote-%U.socket
+
+[Install]
+WantedBy=sockets.target
+```
+
+and `~/.config/systemd/user/bash-zygote.service`:
 
 ```
 [Unit]
@@ -51,7 +61,7 @@ WantedBy=default.target
 Start it with:
 
 ```
-systemctl --user enable --now bash-zygote.service
+systemctl --user enable --now bash-zygote.socket
 ```
 
 Configure your terminal with `bash-zygote-client` as default
