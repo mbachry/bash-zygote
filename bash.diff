@@ -103,11 +103,6 @@ index ebd89651..c3ea87b4 100644
 +            exit_shell(1);
 +        }
 +
-+        if (dup2(tty_fd, 255) < 0) {
-+            fprintf(stderr, "dup2: 255: %m\n");
-+            exit_shell(1);
-+        }
-+
 +        if (login_tty(tty_fd) < 0) {
 +            fprintf(stderr, "login_tty: %m\n");
 +            exit_shell(1);
@@ -122,7 +117,6 @@ index ebd89651..c3ea87b4 100644
 +
 +        indirection_level = 0;
 +        parse_and_execute_level = 0;
-+        adjust_shell_level(-1);
 +
 +        /* Initialize the trap signal handlers before installing our own
 +           signal handlers.  traps.c:restore_original_signals () is responsible
