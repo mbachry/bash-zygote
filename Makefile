@@ -18,4 +18,5 @@ bash/Makefile:
 
 clean:
 	rm -rf build
-	make -C bash clean
+	( cd bash && git reset --hard )
+	( cd bash && git clean -fdx )
