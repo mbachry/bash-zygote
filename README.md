@@ -25,6 +25,9 @@ tabs a lot, especially during heavy compilations.
 
 ## Installation
 
+Clone the repo with `--recurse-submodules` or run `git submodule init`
+and `git submodule update` after cloning.
+
 Make sure all `bash` build requirements are installed. Also install
 `meson` and `libvarlink` development package (`libvarlink-devel` in
 Fedora case).
@@ -73,3 +76,10 @@ shell. For kitty that's `shell ~/.local/bin/bash-zygote-client` in
 You have to restart `bash-zygote` daemon after making changes in
 `~/.bash_profile` or other configs. Restarting the daemon doesn't kill
 existing sessions.
+
+The bash profile is evaluated only once at daemon startup. Any
+per-session side effects like `neofetch` banners won't occur.
+
+Kitty shell integration won't work unless you rename
+`bash-zygote-client` to just `bash` or [set up the integration
+manually](https://sw.kovidgoyal.net/kitty/shell-integration/#manual-shell-integration).
