@@ -35,16 +35,17 @@ index 0b4df73a..6eea41f4 100644
  # Where the source code of the shell builtins resides.
  BUILTIN_SRCDIR=$(srcdir)/builtins
 diff --git a/shell.c b/shell.c
-index ebd89651..1d6a65e5 100644
+index ebd89651..b2929bf1 100644
 --- a/shell.c
 +++ b/shell.c
-@@ -93,6 +93,13 @@ extern int get_tty_state PARAMS((void));
+@@ -93,6 +93,14 @@ extern int get_tty_state PARAMS((void));
  #  include <opennt/opennt.h>
  #endif
  
 +#include <varlink.h>
 +#include <assert.h>
 +#include <sys/epoll.h>
++#include <sys/socket.h>
 +#include <pty.h>
 +#include <utmp.h>
 +#include "spt_status.h"
@@ -52,7 +53,7 @@ index ebd89651..1d6a65e5 100644
  #if !defined (HAVE_GETPW_DECLS)
  extern struct passwd *getpwuid ();
  #endif /* !HAVE_GETPW_DECLS */
-@@ -343,6 +350,204 @@ static void shell_reinitialize PARAMS((void));
+@@ -343,6 +351,230 @@ static void shell_reinitialize PARAMS((void));
  
  static void show_shell_usage PARAMS((FILE *, int));
  
@@ -83,6 +84,29 @@ index ebd89651..1d6a65e5 100644
 +    return -1;
 +}
 +
++static bool check_permissions(VarlinkCall *call)
++{
++    int fd = varlink_call_get_connection_fd(call);
++    if (fd < 0) {
++        fprintf(stderr, "varlink_call_get_connection_fd: %s\n", varlink_error_string(-fd));
++        return false;
++    }
++
++    struct ucred cred;
++    socklen_t optlen = sizeof(cred);
++    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &optlen) < 0) {
++        fprintf(stderr, "getsockopt: %m\n");
++        return false;
++    }
++
++    if (cred.uid != getuid()) {
++        fprintf(stderr, "check_permissions: invalid peer uid: %u\n", cred.uid);
++        return false;
++    }
++
++    return true;
++}
++
 +static long org_bash_zygote_Spawn(VarlinkService *service,
 +                                     VarlinkCall *call,
 +                                     VarlinkObject *parameters,
@@ -93,6 +117,9 @@ index ebd89651..1d6a65e5 100644
 +    const char *current_dir;
 +    int64_t calling_pid;
 +    varlink_ctx *ctx = userdata;
++
++    if (!check_permissions(call))
++        return -1;
 +
 +    if (varlink_object_get_int(parameters, "pid", &calling_pid) < 0) {
 +        fprintf(stderr, "bad missing parameter: pid\n");
@@ -169,7 +196,7 @@ index ebd89651..1d6a65e5 100644
 +    assert(varlink_object_set_int(out, "pid", child_pid) == 0);
 +    int res = varlink_call_reply(call, out, 0);
 +    if (res < 0) {
-+        fprintf(stderr, "varlink_call_reply: %s\n", varlink_error_string(res));
++        fprintf(stderr, "varlink_call_reply: %s\n", varlink_error_string(-res));
 +        varlink_object_unref(out);
 +        return -1;
 +    }
@@ -196,7 +223,7 @@ index ebd89651..1d6a65e5 100644
 +        if (events[i].data.ptr == ctx->service) {
 +            int res = varlink_service_process_events(ctx->service);
 +            if (res < 0)
-+                fprintf(stderr, "varlink_service_process_events: %s (%m)\n", varlink_error_string(res));
++                fprintf(stderr, "varlink_service_process_events: %s (%m)\n", varlink_error_string(-res));
 +        } else
 +            assert(false);
 +    }
@@ -227,7 +254,7 @@ index ebd89651..1d6a65e5 100644
 +                                  socket_addr,
 +                                  fd);
 +    if (res < 0) {
-+        fprintf(stderr, "varlink_service_new: %s (%m)\n", varlink_error_string(res));
++        fprintf(stderr, "varlink_service_new: %s (%m)\n", varlink_error_string(-res));
 +        exit_shell(1);
 +    }
 +    assert(varlink_service_add_interface(ctx.service, interface,
@@ -257,7 +284,7 @@ index ebd89651..1d6a65e5 100644
  #ifdef __CYGWIN__
  static void
  _cygwin32_check_tmp ()
-@@ -829,8 +1034,9 @@ main (argc, argv, env)
+@@ -829,8 +1061,9 @@ main (argc, argv, env)
    if (pretty_print_mode)
      exit_shell (pretty_print_loop ());
  
@@ -269,7 +296,7 @@ index ebd89651..1d6a65e5 100644
    exit_shell (last_command_exit_value);
  }
  
-@@ -1941,13 +2147,6 @@ shell_initialize ()
+@@ -1941,13 +2174,6 @@ shell_initialize ()
       find_shell_builtin () works correctly. */
    initialize_shell_builtins ();
  
@@ -283,7 +310,7 @@ index ebd89651..1d6a65e5 100644
    /* It's highly unlikely that this will change. */
    if (current_host_name == 0)
      {
-@@ -1980,9 +2179,6 @@ shell_initialize ()
+@@ -1980,9 +2206,6 @@ shell_initialize ()
    initialize_shell_variables (shell_environment, privileged_mode||running_setuid);
  #endif
  
