@@ -54,7 +54,7 @@ int main(void) {
   res = varlink_connection_new(&conn, socket_addr);
   if (res < 0) {
     fprintf(stderr, "varlink_connection_new: %s (%m)\n",
-            varlink_error_string(res));
+            varlink_error_string(-res));
     fallback();
   }
 
@@ -63,7 +63,7 @@ int main(void) {
                                 spawn_callback, &done);
   if (res < 0) {
     fprintf(stderr, "varlink_connection_call: %s (%m)\n",
-            varlink_error_string(res));
+            varlink_error_string(-res));
     fallback();
   }
 
@@ -89,7 +89,7 @@ int main(void) {
     res = varlink_connection_process_events(conn, events[0].events);
     if (res < 0) {
       fprintf(stderr, "varlink_connection_process_events: %s (%m)\n",
-              varlink_error_string(res));
+              varlink_error_string(-res));
       fallback();
     }
 
