@@ -1,8 +1,8 @@
 diff --git a/Makefile.in b/Makefile.in
-index 0b4df73a..6eea41f4 100644
+index c4a882f7..874e4902 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -430,7 +430,7 @@ BASHINCFILES =	 $(BASHINCDIR)/posixstat.h $(BASHINCDIR)/ansi_stdlib.h \
+@@ -461,7 +461,7 @@ BASHINCFILES =	 $(BASHINCDIR)/posixstat.h $(BASHINCDIR)/ansi_stdlib.h \
  
  LIBRARIES = $(GLOB_LIB) $(SHLIB_LIB) $(READLINE_LIB) $(HISTORY_LIB) \
  	    $(TERMCAP_LIB) $(TILDE_LIB) $(MALLOC_LIB) $(INTL_LIB) $(LIBICONV) \
@@ -11,7 +11,7 @@ index 0b4df73a..6eea41f4 100644
  
  LIBDEP = $(GLOB_DEP) $(SHLIB_DEP) $(INTL_DEP) $(READLINE_DEP) $(HISTORY_DEP) \
  	 $(TERMCAP_DEP) $(TILDE_DEP) $(MALLOC_DEP)
-@@ -450,11 +450,11 @@ CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
+@@ -484,11 +484,11 @@ CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
  	   input.c bashhist.c array.c arrayfunc.c assoc.c sig.c pathexp.c \
  	   unwind_prot.c siglist.c bashline.c bracecomp.c error.c \
  	   list.c stringlib.c locale.c findcmd.c redir.c \
@@ -20,12 +20,12 @@ index 0b4df73a..6eea41f4 100644
  
  HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
  	   general.h variables.h config.h $(ALLOC_HEADERS) alias.h \
--	   quit.h unwind_prot.h syntax.h ${GRAM_H} \
-+	   quit.h unwind_prot.h syntax.h ${GRAM_H} spt_status.h \
+-	   quit.h unwind_prot.h syntax.h \
++	   quit.h unwind_prot.h syntax.h spt_status.h \
  	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
  	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
  	   array.h arrayfunc.h sig.h mailcheck.h bashintl.h bashjmp.h \
-@@ -494,7 +494,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
+@@ -532,7 +532,7 @@ OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o \
  	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
  	   alias.o $(ARRAY_O) arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
  	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
@@ -35,10 +35,10 @@ index 0b4df73a..6eea41f4 100644
  # Where the source code of the shell builtins resides.
  BUILTIN_SRCDIR=$(srcdir)/builtins
 diff --git a/shell.c b/shell.c
-index ebd89651..b2929bf1 100644
+index e59029cc..8f81bb40 100644
 --- a/shell.c
 +++ b/shell.c
-@@ -93,6 +93,14 @@ extern int get_tty_state PARAMS((void));
+@@ -93,6 +93,14 @@ extern int get_tty_state (void);
  #  include <opennt/opennt.h>
  #endif
  
@@ -51,11 +51,11 @@ index ebd89651..b2929bf1 100644
 +#include "spt_status.h"
 +
  #if !defined (HAVE_GETPW_DECLS)
- extern struct passwd *getpwuid ();
+ extern struct passwd *getpwuid (uid_t);
  #endif /* !HAVE_GETPW_DECLS */
-@@ -343,6 +351,230 @@ static void shell_reinitialize PARAMS((void));
+@@ -349,6 +357,230 @@ static void shell_reinitialize (void);
  
- static void show_shell_usage PARAMS((FILE *, int));
+ static void show_shell_usage (FILE *, int);
  
 +
 +typedef struct {
@@ -283,8 +283,8 @@ index ebd89651..b2929bf1 100644
 +
  #ifdef __CYGWIN__
  static void
- _cygwin32_check_tmp ()
-@@ -829,8 +1061,9 @@ main (argc, argv, env)
+ _cygwin32_check_tmp (void)
+@@ -830,8 +1062,9 @@ main (int argc, char **argv, char **env)
    if (pretty_print_mode)
      exit_shell (pretty_print_loop ());
  
@@ -296,7 +296,7 @@ index ebd89651..b2929bf1 100644
    exit_shell (last_command_exit_value);
  }
  
-@@ -1941,13 +2174,6 @@ shell_initialize ()
+@@ -1926,13 +2159,6 @@ shell_initialize (void)
       find_shell_builtin () works correctly. */
    initialize_shell_builtins ();
  
@@ -310,7 +310,7 @@ index ebd89651..b2929bf1 100644
    /* It's highly unlikely that this will change. */
    if (current_host_name == 0)
      {
-@@ -1980,9 +2206,6 @@ shell_initialize ()
+@@ -1965,9 +2191,6 @@ shell_initialize (void)
    initialize_shell_variables (shell_environment, privileged_mode||running_setuid);
  #endif
  
